@@ -36,12 +36,9 @@ async function main() {
 
 
     app.get("/employees", (req, res) => {
-        Employee.find({
-            experience: 3,
-            department: "Engineering",
-        }).then((result) => {
+        Employee.find({}).then((result) => {
             res.json(result);
-        });
+        }).catch((err) => res.status(500).json({ error: err.message }));
     });
 
     app.get("/employees/:id", (req, res) => {
@@ -64,31 +61,23 @@ async function main() {
     });
     app.put("/employees/:id", (req, res) => {
         const employeedIdInRequest = req.params.id;
-        const update = validation(req.body);
-        const employee = find((employee) => {
-            return employee.id == employeedIdInRequest;
-        });
-        const employeeIndex = findIndex((employee) => {
-            return employee.id == employeedIdInRequest;
-        });
-        const updatedEmployee = { ...employee, ...update };
-        data[employeeIndex] = updatedEmployee;
-        res.json(updatedEmployee);
+        const update = req.body;
+
+        Employee.findByIdAndUpdate(
+            employeedIdInRequest,
+            update,
+        ).then((updatedEmployee) => {
+            res.json(updatedEmployee);
+
+        })
     });
 
     app.delete("/employees/:id", (req, res) => {
-        const employeedIdInRequest = parseInt(req.params.id);
-        const employeeIndex = findIndex((employee) => {
-            return employee.id == employeedIdInRequest;
-        });
-        if (employeeIndex != -1) {
-            data = filter((employee) => {
-                return employee.id !== employeedIdInRequest;
-            });
-            res.send({ massage: "removed successfully" });
-        } else {
-            res.send({ error: "items not found" });
-        }
+        const employeedIdInRequest = req.params.id;
+        Employee.findByIdAndDelete(employeedIdInRequest).then((result) => {
+            res.json("deleated employee successfully");
+        })
+
     });
 }
 
